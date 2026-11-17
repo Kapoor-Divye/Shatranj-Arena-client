@@ -2,30 +2,54 @@ import React from 'react';
 import { useTournament } from '../../context/TournamentContext';
 
 export default function Header({ onOpenAudit }) {
-  const { activeTab, setActiveTab } = useTournament();
+  const {
+    activeTab,
+    setActiveTab,
+    activeTournament,
+    isDirector,
+    closeTournament
+  } = useTournament();
 
-  // Navigation tab configuration matching tournament management standards
   const navigationTabs = [
-    { id: 'details', label: 'Details', disabled: true },
+    { id: 'details', label: 'Details', disabled: false },
     { id: 'players', label: 'Player Management', disabled: false },
     { id: 'pairings', label: 'Pairings', disabled: false },
     { id: 'standings', label: 'Standings', disabled: false },
-    { id: 'scores', label: 'Score Upload', disabled: false },
+    ...(isDirector ? [{ id: 'scores', label: 'Score Upload', disabled: false }] : []),
     { id: 'prize_mgmt', label: 'Prize Management', disabled: true },
     { id: 'prize_dist', label: 'Prize Distribution', disabled: true },
-    { id: 'terms', label: 'Commercial Terms', disabled: true },
+    { id: 'terms', label: 'Commercial Terms', disabled: true }
   ];
 
   return (
     <header className="border-b border-[#E8E2D9] bg-[#FAF7F2]">
-      <div className="max-w-7xl mx-auto px-6 pt-7 pb-2">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-serif font-black tracking-tight text-stone-900">
-            Tournament
-          </h1>
-          
-          {/* Live cryptographic audit drawer toggle */}
-          <button 
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-2">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-5">
+          <div>
+            <button
+              type="button"
+              onClick={closeTournament}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-900 mb-2 transition-colors"
+            >
+              <span>←</span> Back to All Tournaments
+            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-serif font-black tracking-tight text-stone-900">
+                {activeTournament?.title || 'Tournament'}
+              </h1>
+              {isDirector ? (
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-400 text-stone-950 shadow-sm">
+                  ★ Tournament Director
+                </span>
+              ) : (
+                <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-stone-200/80 text-stone-700">
+                  Spectator (Read-Only)
+                </span>
+              )}
+            </div>
+          </div>
+
+          <button
             type="button"
             onClick={onOpenAudit}
             className="flex items-center gap-2.5 px-3.5 py-1.5 text-xs font-mono bg-stone-900 text-stone-100 rounded-lg hover:bg-stone-800 transition-colors shadow-sm"
@@ -35,7 +59,6 @@ export default function Header({ onOpenAudit }) {
           </button>
         </div>
 
-        {/* Primary Navigation Tabs */}
         <nav className="flex space-x-7 overflow-x-auto no-scrollbar">
           {navigationTabs.map(tab => {
             const isActive = activeTab === tab.id;

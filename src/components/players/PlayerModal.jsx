@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function PlayerModal({ isOpen, onClose, onSave, playerData }) {
   const [formData, setFormData] = useState({
-    id: '',
+    fideId: '',
     name: '',
     gender: 'Male',
     age: '',
@@ -13,16 +13,16 @@ export default function PlayerModal({ isOpen, onClose, onSave, playerData }) {
   useEffect(() => {
     if (playerData) {
       setFormData({
-        id: playerData.id || '',
+        fideId: playerData.fideId || '',
         name: playerData.name || '',
         gender: playerData.gender || 'Male',
         age: playerData.age || '',
         rating: playerData.rating || 0
       });
     } else {
-      // Auto-generate a dummy numeric ID for new registrations
+      // Leave FIDE ID empty by default so unrated players save as null
       setFormData({
-        id: Math.floor(10000000 + Math.random() * 90000000).toString(),
+        fideId: '',
         name: '',
         gender: 'Male',
         age: '',
@@ -37,8 +37,13 @@ export default function PlayerModal({ isOpen, onClose, onSave, playerData }) {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
+    const trimmedFideId = formData.fideId.trim();
+
     onSave({
-      ...formData,
+      ...(playerData?.id ? { id: playerData.id } : {}),
+      name: formData.name.trim(),
+      fideId: trimmedFideId === '' ? null : trimmedFideId,
+      gender: formData.gender,
       age: Number(formData.age) || 18,
       rating: Number(formData.rating) || 0,
       isWithdrawn: playerData ? playerData.isWithdrawn : false,
@@ -54,9 +59,9 @@ export default function PlayerModal({ isOpen, onClose, onSave, playerData }) {
           <h3 className="text-lg font-bold text-stone-900">
             {playerData ? 'Edit Participant Details' : 'Register New Participant'}
           </h3>
-          <button 
+          <button
             type="button"
-            onClick={onClose} 
+            onClick={onClose}
             className="text-stone-400 hover:text-stone-700 font-bold"
           >
             ✕
@@ -81,12 +86,13 @@ export default function PlayerModal({ isOpen, onClose, onSave, playerData }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-stone-600 mb-1">
-                FIDE ID
+                FIDE ID (Optional)
               </label>
               <input
                 type="text"
-                value={formData.id}
-                onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                value={formData.fideId}
+                onChange={(e) => setFormData({ ...formData, fideId: e.target.value })}
+                placeholder="Blank if unrated"
                 className="w-full px-3.5 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 font-mono text-xs"
               />
             </div>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useTournament } from '../../context/TournamentContext';
 
 export default function ActionBanner({ description }) {
+  const { activeTournament } = useTournament();
   const [copied, setCopied] = useState(false);
 
-  // Copy current URL to clipboard with fallback confirmation
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -14,22 +15,23 @@ export default function ActionBanner({ description }) {
     }
   };
 
-  // Open WhatsApp Web/App prefilled with tournament link
   const handleShareWhatsApp = () => {
-    const shareMessage = encodeURIComponent(`View tournament pairings and live standings: ${window.location.href}`);
+    const title = activeTournament?.title || 'Chess Tournament';
+    const shareMessage = encodeURIComponent(
+      `View ${title} pairings and live standings: ${window.location.href}`
+    );
     window.open(`https://api.whatsapp.com/send?text=${shareMessage}`, '_blank');
   };
 
   return (
     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 py-6 border-b border-[#E8E2D9] text-stone-600 text-sm">
       <p className="max-w-3xl leading-relaxed">
-        {description || (
-          "Before the start of each round, pairings will be announced promptly to ensure fair matchups and exciting encounters. After the completion of each round, we will promptly publish detailed results on our website, including individual game outcomes and overall standings."
-        )}
+        {description ||
+          activeTournament?.description ||
+          'Before the start of each round, pairings will be announced promptly to ensure fair matchups and exciting encounters. After the completion of each round, we will promptly publish detailed results on our website, including individual game outcomes and overall standings.'}
       </p>
 
       <div className="flex items-center gap-3 shrink-0 self-end lg:self-center">
-        {/* Copy Link Button */}
         <button
           type="button"
           onClick={handleCopyLink}
@@ -41,7 +43,6 @@ export default function ActionBanner({ description }) {
           </svg>
         </button>
 
-        {/* WhatsApp Share Button */}
         <button
           type="button"
           onClick={handleShareWhatsApp}
